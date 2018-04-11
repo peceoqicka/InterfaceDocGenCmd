@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>${docName}</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-treeview/1.2.0/bootstrap-treeview.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
+    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap-treeview/1.2.0/bootstrap-treeview.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/jquery-jsonview/1.2.3/jquery.jsonview.css" rel="stylesheet">
+</head>
+<body>
+<div id="title_bar">
+    <div id="menu_sec">
+        <i id="btnToggleMenu" class="fa fa-bars"></i>
+        <span>${company}</span>
+    </div>
+    <div id="op_sec">
+        <span id="doc_name">${docName}</span>
+        <span id="doc_version">v<span>${docVersion}</span></span>
+        <div id="updateLog">更新履历</div>
+    </div>
+</div>
+<div id="content_sec">
+    <div id="content_left">
+        <div class="menu-source">${catalogSource}</div>
+    </div>
+    <div id="content">
+        <div class="update-wrapper">
+            <div class="content-title">接口文档更新说明</div>
+            <div class="content-update">
+                <table>
+                    <tr>
+                        <td>版本</td>
+                        <td>变更内容</td>
+                        <td>时间</td>
+                    </tr>
+                    [#list updateList as logItem]
+                    <tr>
+                        <td>${logItem.version}</td>
+                        <td>${logItem.log}</td>
+                        <td>${logItem.date}</td>
+                    </tr>
+                    [/#list]
+                </table>
+            </div>
+        </div>
+        [#list contentList as item]
+        <div data-id="${item.index}" class="content-wrapper">
+            <div class="content-title">${item.name}</div>
+            <div class="content-sec-title">请求方式</div>
+            <div class="content-request-type">${item.requestType}</div>
+            <div class="content-sec-title">请求地址</div>
+            <!--suppress HtmlUnknownTarget -->
+            <a class="content-url" href="${item.url}" target="_blank">${item.url}</a>
+            <div class="content-sec-title">请求参数</div>
+            [#if item.param?size > 0]
+            <ul class="content-param">
+                [#list item.param as param]
+                <li>${param.name} : ${param.describe}</li>
+                [/#list]
+            </ul>
+            [#else]
+            <div class="content-param">无</div>
+            [/#if]
+            <div class="content-sec-title">响应结果</div>
+            <div class="content-response-sec">
+                <div class="content-response-hide">${item.response}</div>
+                <div class="content-response"></div>
+                <div class="content-response-mark">
+                    [#if item.responseDescribe?size !=0]
+                    <table>
+                        <tr>
+                            <td>字段</td>
+                            <td>说明</td>
+                        </tr>
+                        [#list item.responseDescribe as responseItem]
+                        <tr>
+                            <td>${responseItem.name}</td>
+                            <td>${responseItem.describe}</td>
+                        </tr>
+                        [/#list]
+                    </table>
+                    [/#if]
+                </div>
+                <div class="content-response-op">
+                    <button type="button">复制纯文本</button>
+                </div>
+            </div>
+            <div class="content-sec-title">备注</div>
+            <div class="content-describe">[#if item.tip?length > 0]${item.tip}[#else]无[/#if]</div>
+        </div>
+        [/#list]
+    </div>
+</div>
+<div id="menu_content_sec">
+</div>
+<script>
+    var lastSelected = -1;
+    var isTogglingMenu = false;
+    var isMenuShowing = true;
+
+    $(document).ready(function () {
+        catalogSetup();
+        updateLogSetup();
+        jsonBeautifySetup();
+        jsonPlainTextSetup();
+        toggleMenuSetup();
+    });
+
+    function catalogSetup() {
+        var catalogData = $.parseJSON($('.menu-source').text().replace(/[\s]*/g, ''));
+
+        $('#menu_content_sec').treeview({
+            data: catalogData,
+            showBorder: false,
+            backColor: '#F5F8FA',
+            onNodeSelected: function (event, data) {
+                if (lastSelected === -1) {
+                    $('.update-wrapper').hide();
+                }
+                $('.content-wrapper[data-id="' + lastSelected + '"]')
+                    .hide();
+                // noinspection JSUnresolvedVariable
+                $('.content-wrapper[data-id="' + data.interfaceIndex + '"]')
+                    .show();
+                // noinspection JSUnresolvedVariable
+                lastSelected = data.interfaceIndex;
+            }
+        });
+    }
+
+    function updateLogSetup() {
+        $('#updateLog').click(function () {
+            if (lastSelected !== -1) {
+                $('.content-wrapper[data-id="' + lastSelected + '"]')
+                    .hide();
+                $('.update-wrapper').show(function () {
+                    lastSelected = -1;
+                });
+            }
+        });
+    }
+
+    function jsonBeautifySetup() {
+        $('.content-wrapper').each(function () {
+            var jsonText = $(this).find('.content-response-hide').text()
+                .replace(/[\s]*/g, '');
+            var json = $.parseJSON(jsonText);
+            $(this).find('.content-response').JSONView(json)
+        });
+    }
+
+    function jsonPlainTextSetup() {
+        $('button').click(function () {
+            var $sourceCode = $(this).parent('.content-response-op').siblings('.content-response-hide');
+            var opWin = window.open("about:blank", "_blank",
+                "width=400,height=300,scrollbars=yes,resizable=1,modal=false,alwaysRaised=yes");
+            opWin.document.write($sourceCode.text());
+        });
+    }
+
+    function toggleMenuSetup() {
+        $('#btnToggleMenu').click(function () {
+            var $this = $(this);
+            if (!isTogglingMenu) {
+                isTogglingMenu = true;
+                if (isMenuShowing) {
+                    $('#menu_content_sec').animate({left: '-=240px'}, 400, function () {
+                        isMenuShowing = false;
+                        isTogglingMenu = false;
+                    });
+                    $('#content_left').animate({width: '0px'}, 400);
+                    $this.animate({opacity: 0.6}, 400);
+                } else {
+                    $('#menu_content_sec').animate({left: '+=240px'}, 500, function () {
+                        isMenuShowing = true;
+                        isTogglingMenu = false;
+                    });
+                    $('#content_left').animate({width: '240px'}, 500);
+                    $this.animate({opacity: 1}, 500);
+                }
+            }
+        });
+    }
+</script>
+</body>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    #title_bar {
+        width: 100%;
+        height: 60px;
+        display: block;
+        background: #5760ff;
+        position: fixed;
+        box-shadow: 0 1px 0 #CCC;
+        z-index: 1;
+    }
+
+    #menu_sec {
+        width: 240px;
+        height: 100%;
+        float: left;
+        display: block;
+        position: relative;
+        box-shadow: 1px 0 0 rgba(51, 51, 51, 0.73);
+    }
+
+    #menu_sec > span {
+        display: block;
+        color: white;
+        position: absolute;
+        top: 50%;
+        left: 60px;
+        font-size: 20px;
+        transform: translateY(-50%);
+    }
+
+    #btnToggleMenu {
+        display: block;
+        color: white;
+        position: absolute;
+        top: 50%;
+        left: 20px;
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
+
+    #op_sec {
+        overflow: hidden;
+        height: 100%;
+        display: block;
+        position: relative;
+    }
+
+    #op_sec > span {
+        display: block;
+        color: white;
+        font-size: 25px;
+    }
+
+    #updateLog {
+        position: absolute;
+        top: 50%;
+        right: 20px;
+        color: white;
+        font-size: 20px;
+        padding: 4px 8px;
+        transform: translateY(-50%);
+        border-radius: 3px 3px 3px 3px;
+        box-shadow: 0 0 10px 1px rgba(75, 75, 75, 0.58);
+        cursor: pointer;
+    }
+
+    #updateLog:hover {
+        box-shadow: 0 0 10px 3px rgba(75, 75, 75, 0.58);
+    }
+
+    #doc_name {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+    }
+
+    #doc_version {
+        position: absolute;
+        top: 50%;
+        left: 430px;
+        transform: translateY(-50%);
+    }
+
+    #menu_content_sec {
+        width: 240px;
+        height: 100%;
+        display: block;
+        top: 60px;
+        position: fixed;
+        background: #F5F8FA;
+        box-shadow: 1px 0 0 rgba(51, 51, 51, 0.73);
+    }
+
+    #content_sec {
+        width: 100%;
+        top: 60px;
+        position: relative;
+        z-index: 0;
+    }
+
+    #content_left {
+        width: 240px;
+        height: 100px;
+        float: left;
+        display: block;
+        position: relative;
+        box-shadow: 1px 0 0 rgba(51, 51, 51, 0);
+    }
+
+    .menu-source {
+        display: none;
+    }
+
+    #content {
+        overflow: hidden;
+        position: relative;
+    }
+
+    .content-wrapper {
+        width: 88%;
+        margin: 50px 6%;
+        display: none;
+    }
+
+    .update-wrapper {
+        width: 88%;
+        margin: 50px 6%;
+    }
+
+    .content-update table, .content-response-mark table {
+        border: solid #a4c3d9;
+        border-width: 1px 0 0 1px;
+        background: #F5F8FA;
+    }
+
+    .content-update tr, .content-response-mark tr {
+        border: solid #a4c3d9;
+        border-width: 0 1px 1px 0;
+    }
+
+    .content-update td, .content-response-mark td {
+        border: solid #a4c3d9;
+        border-width: 0 1px 0 0;
+        padding: 10px 20px;
+    }
+
+    .content-title {
+        font-size: 36px;
+        font-weight: bold;
+    }
+
+    .content-sec-title {
+        width: 100%;
+        box-shadow: 0 1px 0 #CCC;
+        font-size: 25px;
+        margin-top: 60px;
+    }
+
+    .content-request-type, .content-url, .content-param, .content-update {
+        margin-top: 20px;
+    }
+
+    .content-url {
+        display: block;
+    }
+
+    .content-response-sec {
+        /*background: #f5f8fa;*/
+        font-size: 18px;
+        margin-top: 20px;
+        position: relative;
+    }
+
+    .content-response-hide {
+        display: none;
+    }
+
+    .content-response-mark {
+        margin-top: 20px;
+    }
+
+    .content-response {
+        background: #f5f8fa;
+    }
+
+    .content-response-op {
+        position: absolute;
+        display: block;
+        top: 0;
+        right: 0;
+    }
+
+    .content-describe {
+        margin-top: 10px;
+    }
+
+</style>
+</html>

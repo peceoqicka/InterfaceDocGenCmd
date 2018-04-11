@@ -1,0 +1,87 @@
+{
+  "docName": "线索管理平台接口文档",
+  "docVersion": "1.0",
+  "company": "次元科技",
+  "catalog": [
+    {
+      "text": "1.全局接口",
+      "selectable": false,
+      "nodes": [
+        {
+          "text": "1.1 版本检查",
+          "selectable": true,
+          "interfaceIndex": 0
+        }
+      ]
+    },
+    {
+      "text": "2.系统相关",
+      "selectable": false,
+      "nodes": [
+        {
+          "text": "2.1 关于我们",
+          "selectable": true,
+          "interfaceIndex": 1
+        },
+        {
+          "text": "2.2 意见反馈",
+          "selectable": true,
+          "interfaceIndex": 2
+        }
+      ]
+    }
+  ],
+  "update": [
+    {
+      "version": "1.0",
+      "log": "初版",
+      "date": "2018-4-10 14:11"
+    }
+  ],
+  "content": [
+    {
+      "index": 0,
+      "name": "版本检查",
+      "requestType": "HTTP GET",
+      "url": "http://someService.com/app/interface/commonI.mvc?method=getNewVersion",
+      "param": [],
+      "response": "{\"error\": \"\",\"obj\": {\"sCode\": \"1.0\", \"appCode\":\"1.0\", \"url\": \"http://site.com/\"}, \"state\": \"200\", \"time\":\"1470206758\"}",
+      "responseDescribe": [
+        {
+          "name": "sCode",
+          "describe": "皮肤最新版本"
+        }
+      ],
+      "tip": ""
+    },
+    {
+      "index": 1,
+      "name": "关于我们",
+      "requestType": "HTTP GET",
+      "url": "http://someService.com/app/interface/commonI.mvc?method=about",
+      "param": [],
+      "response": "{\"error\": \"\",\"obj\": {\"content\": \"tech\", \"logo\":\"http://logo.jpg\"}, \"state\": \"200\", \"time\":\"1470206758\"}",
+      "responseDescribe": [],
+      "tip": ""
+    },
+    {
+      "index": 2,
+      "name": "意见反馈",
+      "requestType": "HTTP GET",
+      "url": "http://someService.com/app/interface/commonI.mvc?method=advise",
+      "param": [
+        {
+          "name": "content",
+          "describe": "内容"
+        },
+        {
+          "name": "id",
+          "describe": "用户id"
+        }
+      ],
+      "response": "{\"error\": \"\",\"obj\": \"感谢您的意见\", \"state\": \"200\", \"time\":\"1470206758\"}",
+      "responseDescribe": [],
+      "tip": "备注可以用作非接口的描述文档"
+    }
+  ]
+}

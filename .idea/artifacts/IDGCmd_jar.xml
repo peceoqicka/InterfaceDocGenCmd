@@ -1,0 +1,15 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="IDGCmd:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/IDGCmd_jar</output-path>
+    <root id="archive" name="IDGCmd.jar">
+      <element id="module-output" name="IDGCmd" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/freemarker-2.3.8.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/gson-2.8.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$KOTLIN_BUNDLED$/lib/kotlin-stdlib.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$KOTLIN_BUNDLED$/lib/kotlin-reflect.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$KOTLIN_BUNDLED$/lib/kotlin-test.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$KOTLIN_BUNDLED$/lib/kotlin-stdlib-jdk7.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$KOTLIN_BUNDLED$/lib/kotlin-stdlib-jdk8.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
